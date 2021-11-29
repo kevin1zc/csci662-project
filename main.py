@@ -53,7 +53,7 @@ def train(model, data_loader, loss_fn, optimizer):
     for utterances, labels in tqdm(data_loader):
         utterances = utterances.cuda()
         labels = labels.cuda()
-        model.zero_grad()
+        optimizer.zero_grad()
         labels_pred = roberta.predict('contradiction_detect', utterances)
         loss = loss_fn(labels_pred, labels)
         loss.backward()
@@ -84,6 +84,7 @@ if __name__ == "__main__":
     torch.hub._validate_not_a_forked_repo = lambda a, b, c: True
     roberta = torch.hub.load('pytorch/fairseq', 'roberta.base')
     roberta.register_classification_head('contradiction_detect', num_classes=2)
+    roberta.eval()
 
     unstructured = False
     train_data = DECODE("decode_v0.1/train.jsonl", unstructured)
@@ -99,7 +100,7 @@ if __name__ == "__main__":
 
     roberta.cuda()
     loss_fn = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(roberta.parameters(), lr=0.0001, weight_decay=1e-8)
+    optimizer = optim.Adam(roberta.parameters(), lr=0.0001, weight_decay=1e-6)
 
     train_losses = []
     val_losses = []
