@@ -30,12 +30,14 @@ class DECODE(Dataset):
         speaker_utterances = defaultdict()
         last_speaker = -1
         for turn in instance['turns']:
-            all_utterances.append(turn['text'])
-            last_speaker = turn['agent_id']
+            speaker = turn['agent_id']
+            # prepend each utterance with special token that denotes the speaker
+            all_utterances.append('<{0}> {1}'.format(speaker, turn['text']))
+            last_speaker = speaker
             try:
-                speaker_utterances[turn['agent_id']].append(turn['text'])
+                speaker_utterances[speaker].append(turn['text'])
             except KeyError:
-                speaker_utterances[turn['agent_id']] = [turn['text']]
+                speaker_utterances[speaker] = [turn['text']]
 
         if unstructured:
             return all_utterances, is_contradiction
