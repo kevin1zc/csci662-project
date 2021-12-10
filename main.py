@@ -8,6 +8,7 @@ from functools import partial
 from tqdm import tqdm
 import numpy as np
 import pickle
+import os
 
 
 def collate_batch(batch, roberta, unstructured=False):
@@ -85,12 +86,14 @@ if __name__ == "__main__":
     val_losses = []
     val_accs = []
 
+    os.makedirs("checkpoints", exist_ok=True)
+
     for epoch in range(EPOCHS):
         print(f"Epoch: {epoch + 1}")
         train_loss = train(roberta, train_dataloader, loss_fn, optimizer)
         print(f"    Train loss: {train_loss}")
         train_losses.append(train_loss)
-        torch.save(roberta.model.state_dict(), f"checkpoint_{epoch + 1}.pt")
+        torch.save(roberta.model.state_dict(), f"checkpoints/checkpoint_{epoch + 1}.pt")
 
         val_loss, val_acc = validate(roberta, val_dataloader, loss_fn)
         print(f"    Validation loss: {val_loss}")
