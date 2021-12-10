@@ -25,28 +25,6 @@ def collate_batch(batch, roberta, unstructured=False):
         return utterances_batch, labels_batch
 
 
-# TODO: Process data according to the paper. Not finished yet.
-# def collate_batch(batch, roberta, unstructured=False):
-#     if unstructured:
-#         pass
-#     else:
-#         utterances_batch, labels_batch = [], []
-#         for utterances_pairs, is_contradiction, contradiction_indices in batch:
-#             utterances_instance = []
-#             for prev, last in utterances_pairs:
-#                 prev_idx, prev_utterance = prev
-#                 last_idx, past_utterance = last
-#                 utterances_instance.append(roberta.encode(prev_utterance, past_utterance))
-#             utterances_instance = collate_tokens(utterances_instance, pad_idx=1)
-#             utterances_batch.append(utterances_instance)
-#             labels_batch.append(is_contradiction)
-#
-#         utterances_batch = collate_tokens(utterances_batch, pad_idx=1)
-#         labels_batch = torch.tensor(labels_batch, dtype=torch.int64)
-#
-#         return utterances_batch, labels_batch
-
-
 def train(model, data_loader, loss_fn, optimizer):
     losses = []
     model.train()
@@ -78,11 +56,12 @@ def validate(model, data_loader, loss_fn):
 
 
 if __name__ == "__main__":
-    EPOCHS = 5
-    BATCH_SIZE = 8
+    EPOCHS = 20
+    BATCH_SIZE = 32
 
     torch.hub._validate_not_a_forked_repo = lambda a, b, c: True
-    roberta = torch.hub.load('pytorch/fairseq', 'roberta.base')
+    # roberta = torch.hub.load('pytorch/fairseq', 'roberta.base')
+    roberta = torch.hub.load('pytorch/fairseq', 'roberta.large.mnli')
     roberta.register_classification_head('contradiction_detect', num_classes=2)
     roberta.eval()
 
@@ -100,7 +79,7 @@ if __name__ == "__main__":
 
     roberta.cuda()
     loss_fn = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(roberta.parameters(), lr=0.0001, weight_decay=1e-6)
+    optimizer = optim.Adam(roberta.parameters(), lr=1e-5, weight_decay=0.1)
 
     train_losses = []
     val_losses = []
@@ -111,6 +90,7 @@ if __name__ == "__main__":
         train_loss = train(roberta, train_dataloader, loss_fn, optimizer)
         print(f"    Train loss: {train_loss}")
         train_losses.append(train_loss)
+        torch.save(roberta.model.state_dict(), f"checkpoint_{epoch + 1}.pt")
 
         val_loss, val_acc = validate(roberta, val_dataloader, loss_fn)
         print(f"    Validation loss: {val_loss}")

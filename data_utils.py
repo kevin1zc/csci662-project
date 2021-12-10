@@ -9,17 +9,41 @@ class DECODE(Dataset):
     def __init__(self, data_file, unstructured=False):
         with open(data_file, 'r') as f:
             data = f.read().splitlines()
-            self.data = [json.loads(line) for line in data]
+            self.raw_data = [json.loads(line) for line in data]
         num_len = set()
-        for d in self.data:
+        for d in self.raw_data:
             num_len.add(len(d["aggregated_contradiction_indices"]))
         self.unstructured = unstructured
+        self.data = []
+        if unstructured:
+            pass
+        else:
+            self.parse_structured()
 
     def __len__(self):
         return len(self.data)
 
     def __getitem__(self, idx):
-        return self.parse_json(self.data[idx], self.unstructured)
+        return self.data[idx]
+
+    def parse_structured(self):
+        for instance in self.raw_data:
+            contradiction_idx = instance['aggregated_contradiction_indices']
+            speaker_utterances = defaultdict()
+            last_speaker = -1
+            for turn in instance['turns']:
+                speaker = turn['agent_id']
+                last_speaker = speaker
+                try:
+                    speaker_utterances[speaker].append(turn['text'])
+                except KeyError:
+                    speaker_utterances[speaker] = [turn['text']]
+            utterances = speaker_utterances[last_speaker]
+            for i in range(len(utterances) - 1):
+                turn_idx = i * 2 + last_speaker
+                label = 1 if turn_idx in contradiction_idx else 0
+                self.data.append(([utterances[i], utterances[-1]], label))
+            a = 0
 
     # TODO:
     def parse_json(self, instance, unstructured):
