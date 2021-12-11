@@ -8,7 +8,7 @@ WARMUP_UPDATES=562
 LR=1e-05
 HEAD_NAME=decode_${FORMAT}_head
 NUM_CLASSES=2
-MAX_SENTENCES=16
+MAX_SENTENCES=32
 ROBERTA_PATH=../roberta.base/model.pt
 
 fairseq-train ../decode-bin/$FORMAT/ \
@@ -32,4 +32,4 @@ fairseq-train ../decode-bin/$FORMAT/ \
   --best-checkpoint-metric accuracy --maximize-best-checkpoint-metric \
   --shorten-method "truncate" \
   --find-unused-parameters \
-  --update-freq 2
+  --update-freq 1
