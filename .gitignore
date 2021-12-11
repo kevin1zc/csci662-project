@@ -26,6 +26,11 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+decode-bin
+model_structured
+model_unstructured
+roberta.*
+decode_v0.1
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

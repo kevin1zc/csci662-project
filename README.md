@@ -1,11 +1,14 @@
 # csci662-project
 
-1) Download necessary files: 
+1) Download the model and unzip:
+```wget https://dl.fbaipublicfiles.com/fairseq/models/roberta.base.tar.gz```
+```tar -xzvf roberta.base.tar.gz```
+2) Download necessary files: 
 ```wget -N 'https://dl.fbaipublicfiles.com/fairseq/gpt2_bpe/encoder.json'```
 ```wget -N 'https://dl.fbaipublicfiles.com/fairseq/gpt2_bpe/vocab.bpe'```
 ```wget -N 'https://dl.fbaipublicfiles.com/fairseq/gpt2_bpe/dict.txt'  ```
 
-2) Format the data:
+3) Format the data:
    Run ```format_data.py```
 
 4) Preprocess data: run ```preprocess_data.sh```

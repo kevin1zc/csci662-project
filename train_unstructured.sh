@@ -3,8 +3,8 @@ mkdir -p model_unstructured
 cd model_unstructured || exit
 
 FORMAT=unstructured
-TOTAL_NUM_UPDATES=9370
-WARMUP_UPDATES=562
+TOTAL_NUM_UPDATES=18290
+WARMUP_UPDATES=1097
 LR=1e-05
 HEAD_NAME=decode_${FORMAT}_head
 NUM_CLASSES=2
