@@ -43,6 +43,7 @@ class DECODE(Dataset):
                 turn_idx = i * 2 + last_speaker
                 label = 1 if turn_idx in contradiction_idx else 0
                 self.data.append(([utterances[i], utterances[-1]], label))
+            a = 0
 
     # TODO:
     def parse_json(self, instance, unstructured):
