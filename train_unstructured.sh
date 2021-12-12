@@ -13,7 +13,7 @@ ROBERTA_PATH=../roberta.base/model.pt
 
 fairseq-train ../decode-bin/$FORMAT/ \
   --restore-file $ROBERTA_PATH \
-  --max-positions 512 \
+  --max-positions 1000 \
   --batch-size $MAX_SENTENCES \
   --max-tokens 4400 \
   --task sentence_prediction \
