@@ -35,7 +35,7 @@ def evaluate_structured(roberta):
             pair_label = 1 if turn_idx in contradiction_idx else 0
 
             tokens = roberta.encode(utterances[i], utterances[-1])
-            pair_label_pred = roberta.predict('decode_structured_head', tokens).argmax()
+            pair_label_pred = roberta.predict('decode_head', tokens).argmax()
             if pair_label_pred == pair_label == 1:
                 instance_label_pred = 1
                 tp += 1
@@ -77,7 +77,7 @@ def evaluate_unstructured(roberta):
         prev_utterances = ' '.join(all_utterances[:-1])
         tokens = roberta.encode(prev_utterances, all_utterances[-1])
         try:
-            label_pred = roberta.predict('decode_unstructured_head', tokens).argmax()
+            label_pred = roberta.predict('decode_head', tokens).argmax()
             if label_pred == label:
                 instance_correct += 1
         except:

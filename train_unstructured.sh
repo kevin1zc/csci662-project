@@ -6,14 +6,14 @@ FORMAT=unstructured
 TOTAL_NUM_UPDATES=18250
 WARMUP_UPDATES=1095
 LR=1e-05
-HEAD_NAME=decode_${FORMAT}_head
+HEAD_NAME=decode_head
 NUM_CLASSES=2
 MAX_SENTENCES=32
 ROBERTA_PATH=../roberta.base/model.pt
 
 fairseq-train ../decode-bin/$FORMAT/ \
   --restore-file $ROBERTA_PATH \
-  --max-positions 1000 \
+  --max-positions 512 \
   --batch-size $MAX_SENTENCES \
   --max-tokens 4400 \
   --task sentence_prediction \
