@@ -3,8 +3,8 @@ mkdir -p model_unstructured
 cd model_unstructured || exit
 
 FORMAT=unstructured
-TOTAL_NUM_UPDATES=18290
-WARMUP_UPDATES=1097
+TOTAL_NUM_UPDATES=18250
+WARMUP_UPDATES=1095
 LR=1e-05
 HEAD_NAME=decode_${FORMAT}_head
 NUM_CLASSES=2
@@ -25,7 +25,7 @@ fairseq-train ../decode-bin/$FORMAT/ \
   --classification-head-name $HEAD_NAME \
   --num-classes $NUM_CLASSES \
   --dropout 0.1 --attention-dropout 0.1 \
-  --weight-decay 0.1 --optimizer adam --adam-betas "(0.9, 0.999)" --adam-eps 1e-08 \
+  --weight-decay 0.1 --optimizer adam --adam-betas "(0.9, 0.999)" --adam-eps 1e-06 \
   --clip-norm 0.0 \
   --lr-scheduler polynomial_decay --lr $LR --total-num-update $TOTAL_NUM_UPDATES --warmup-updates $WARMUP_UPDATES \
   --max-epoch 10 \
