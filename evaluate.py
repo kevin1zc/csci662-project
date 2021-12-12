@@ -1,13 +1,19 @@
-import torch
 import json
 from fairseq.models.roberta import RobertaModel
 from collections import defaultdict
 from tqdm import tqdm
 
 
-def evaluate_structured(roberta):
-    print("Evaluating Utterance-based model on DECODE dataset:")
-    data_file = "decode_v0.1/test.jsonl"
+def evaluate_structured_decode(data_file, roberta):
+    if "test" in data_file:
+        data_name = "DECODE"
+    elif "human-bot" in data_file:
+        data_name = "Human-Bot"
+    elif "a2t" in data_file:
+        data_name = "A2T"
+    else:
+        data_name = "RCT"
+    print(f"Evaluating Utterance-based model on {data_name} dataset:")
 
     with open(data_file, 'r') as f:
         raw_data = f.read().splitlines()
@@ -16,6 +22,8 @@ def evaluate_structured(roberta):
     tp = tn = fp = fn = 0
     instance_correct = 0
     instance_strict_correct = 0
+
+    pairs = 0
     for instance in tqdm(raw_data):
         contradiction_idx = instance['aggregated_contradiction_indices']
         instance_label = 1 if instance["is_contradiction"] else 0
@@ -27,6 +35,7 @@ def evaluate_structured(roberta):
             last_speaker = speaker
             speaker_utterances[speaker].append(turn['text'])
         utterances = speaker_utterances[last_speaker]
+        pairs += len(utterances) - 1
 
         instance_label_pred = 0
         all_pairs_correct = True
@@ -53,13 +62,22 @@ def evaluate_structured(roberta):
         if instance_label_pred == instance_label:
             instance_correct += 1
     print(f"  MT: {instance_correct / len(raw_data)}")
-    print(f"  MT strict: {instance_strict_correct / len(raw_data)}")
-    print(f"  SE F1: {tp / (tp + 0.5 * (fp + fn))}")
+    if data_name == "DECODE":
+        print(f"  MT strict: {instance_strict_correct / len(raw_data)}")
+        print(f"  SE F1: {tp / (tp + 0.5 * (fp + fn))}")
+        print(f"  pairs: {(tp + tn) / pairs}")
 
 
-def evaluate_unstructured(roberta):
-    print("Evaluating Unstructured model on DECODE dataset:")
-    data_file = "decode_v0.1/test.jsonl"
+def evaluate_unstructured_decode(data_file, roberta):
+    if "test" in data_file:
+        data_name = "DECODE"
+    elif "human-bot" in data_file:
+        data_name = "Human-Bot"
+    elif "a2t" in data_file:
+        data_name = "A2T"
+    else:
+        data_name = "RCT"
+    print(f"Evaluating Unstructured model on {data_name} dataset:")
 
     with open(data_file, 'r') as f:
         raw_data = f.read().splitlines()
@@ -76,7 +94,7 @@ def evaluate_unstructured(roberta):
             all_utterances.append('<{0}> {1}'.format(speaker, turn['text']))
         prev_utterances = ' '.join(all_utterances[:-1])
         tokens = roberta.encode(prev_utterances, all_utterances[-1])
-        try:
+        try:  # Concatenated utterances may exceed the max length of RoBERTa. Simply ignore this instance.
             label_pred = roberta.predict('decode_head', tokens).argmax()
             if label_pred == label:
                 instance_correct += 1
@@ -88,13 +106,16 @@ def evaluate_unstructured(roberta):
 
 
 if __name__ == "__main__":
-    # roberta = RobertaModel.from_pretrained(
-    #     'model_structured/checkpoints',
-    #     checkpoint_file='checkpoint_best.pt',
-    #     data_name_or_path='decode-bin/structured'
-    # )
-    # roberta.eval().cuda()
-    # evaluate_structured(roberta)
+    roberta = RobertaModel.from_pretrained(
+        'model_structured/checkpoints',
+        checkpoint_file='checkpoint_best.pt',
+        data_name_or_path='decode-bin/structured'
+    )
+    roberta.eval().cuda()
+    evaluate_structured_decode("decode_v0.1/test.jsonl", roberta)
+    evaluate_structured_decode("decode_v0.1/human-bot.jsonl", roberta)
+    evaluate_structured_decode("decode_v0.1/a2t.jsonl", roberta)
+    evaluate_structured_decode("decode_v0.1/rct.jsonl", roberta)
 
     roberta = RobertaModel.from_pretrained(
         'model_unstructured/checkpoints',
@@ -102,4 +123,7 @@ if __name__ == "__main__":
         data_name_or_path='decode-bin/unstructured'
     )
     roberta.eval().cuda()
-    evaluate_unstructured(roberta)
+    evaluate_unstructured_decode("decode_v0.1/test.jsonl", roberta)
+    evaluate_unstructured_decode("decode_v0.1/human-bot.jsonl", roberta)
+    evaluate_unstructured_decode("decode_v0.1/a2t.jsonl", roberta)
+    evaluate_unstructured_decode("decode_v0.1/rct.jsonl", roberta)
