@@ -1,4 +1,3 @@
-import argparse
 import os
 import random
 from collections import defaultdict
@@ -64,20 +63,35 @@ def save_data(samples, save_dir, out_fname):
     f3.close()
 
 
-def main(args):
+def format_decode():
+    datadir = 'decode_v0.1'
     for split in ['train', 'dev']:
-        data_file = os.path.join(args.datadir, split + '.jsonl')
+        data_file = os.path.join(datadir, split + '.jsonl')
 
         with open(data_file, 'r') as f:
             raw_data = f.read().splitlines()
             raw_data = [json.loads(line) for line in raw_data]
 
-        format_structured(args.datadir, split, raw_data)
-        format_unstructured(args.datadir, split, raw_data)
+        format_structured(datadir, split, raw_data)
+        format_unstructured(datadir, split, raw_data)
+
+
+def format_anli():
+    datadir = 'anli_v1.0/R3'
+    for split in ['train', 'dev']:
+        data_file = os.path.join(datadir, split + '.jsonl')
+        samples = []
+        with open(data_file, 'r') as f:
+            raw_data = f.read().splitlines()
+            raw_data = [json.loads(line) for line in raw_data]
+        for instance in raw_data:
+            label = 1 if instance['label'] == 'c' else 0
+            samples.append((instance['context'], instance['hypothesis'], label))
+        random.shuffle(samples)
+        out_fname = split
+        save_data(samples, os.path.join(datadir, "formatted"), out_fname)
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--datadir', default='decode_v0.1')
-    args = parser.parse_args()
-    main(args)
+    format_decode()
+    format_anli()
