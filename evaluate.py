@@ -127,3 +127,18 @@ if __name__ == "__main__":
     evaluate_unstructured_decode("decode_v0.1/human-bot.jsonl", roberta)
     evaluate_unstructured_decode("decode_v0.1/a2t.jsonl", roberta)
     evaluate_unstructured_decode("decode_v0.1/rct.jsonl", roberta)
+
+    roberta = RobertaModel.from_pretrained(
+        'model_unstructured_anli/checkpoints',
+        checkpoint_file='checkpoint_best.pt',
+        data_name_or_path='anli-r3-bin'
+    )
+    roberta.eval().cuda()
+    evaluate_structured_decode("decode_v0.1/test.jsonl", roberta)
+    evaluate_structured_decode("decode_v0.1/human-bot.jsonl", roberta)
+    evaluate_structured_decode("decode_v0.1/a2t.jsonl", roberta)
+    evaluate_structured_decode("decode_v0.1/rct.jsonl", roberta)
+    evaluate_unstructured_decode("decode_v0.1/test.jsonl", roberta)
+    evaluate_unstructured_decode("decode_v0.1/human-bot.jsonl", roberta)
+    evaluate_unstructured_decode("decode_v0.1/a2t.jsonl", roberta)
+    evaluate_unstructured_decode("decode_v0.1/rct.jsonl", roberta)
