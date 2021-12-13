@@ -30,6 +30,7 @@ decode-bin
 anli-r3-bin
 model_structured
 model_unstructured
+model_unstructured_anli
 roberta.*
 *formatted/
 

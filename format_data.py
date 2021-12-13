@@ -23,7 +23,9 @@ def format_structured(datadir, split, raw_data):
                 samples.append((utterances[i], utterances[-1], label))
             else:
                 samples_neg.append((utterances[i], utterances[-1], label))
-    print(f"Number of positive/negative utterance pairs in {split} set: {len(samples)}")
+    num_pos = len(samples)
+    num_neg = len(samples_neg)
+    print(f"DECODE utterance-based {split}: #positive={num_pos}, #negative={num_neg}, ratio={num_pos / num_neg}")
     random.shuffle(samples_neg)
     samples_neg = samples_neg[:len(samples)]
     samples.extend(samples_neg)
@@ -81,12 +83,21 @@ def format_anli():
     for split in ['train', 'dev']:
         data_file = os.path.join(datadir, split + '.jsonl')
         samples = []
+        samples_neg = []
         with open(data_file, 'r') as f:
             raw_data = f.read().splitlines()
             raw_data = [json.loads(line) for line in raw_data]
         for instance in raw_data:
             label = 1 if instance['label'] == 'c' else 0
-            samples.append((instance['context'], instance['hypothesis'], label))
+            if label == 1:
+                samples.append((instance['context'], instance['hypothesis'], label))
+            else:
+                samples_neg.append((instance['context'], instance['hypothesis'], label))
+        num_pos = len(samples)
+        num_neg = len(samples_neg)
+        print(f"ANLI-R3 {split}: #positive={num_pos}, #negative={num_neg}, ratio={num_pos/num_neg}")
+        random.shuffle(samples_neg)
+        samples.extend(samples_neg[:num_pos])
         random.shuffle(samples)
         out_fname = split
         save_data(samples, os.path.join(datadir, "formatted"), out_fname)
